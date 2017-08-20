@@ -12,7 +12,7 @@
   "keywords": ["parse-server", "push", "adapter"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/parse-server-modules/parse-server-push-adapter.git"
+    "url": "git+https://github.com/smackhigh/parse-server-push-adapter-flynn.git"
   },
   "author": "Parse",
   "license": "MIT",
