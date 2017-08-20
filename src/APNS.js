@@ -6,7 +6,6 @@ import log from 'npmlog';
 const LOG_PREFIX = 'parse-server-push-adapter APNS';
 
 export class APNS {
-
   /**
    * Create a new provider for the APN service.
    * @constructor
@@ -35,16 +34,18 @@ export class APNS {
     } else if (typeof args === 'object') {
       apnsArgsList.push(args);
     } else {
-      throw new Parse.Error(Parse.Error.PUSH_MISCONFIGURED, 'APNS Configuration is invalid');
+      throw new Parse.Error(
+        Parse.Error.PUSH_MISCONFIGURED,
+        'APNS Configuration is invalid',
+      );
     }
 
     // Create Provider from each arg-object
     for (let apnsArgs of apnsArgsList) {
-
       // rewrite bundleId to topic for backward-compatibility
       if (apnsArgs.bundleId) {
         log.warn(LOG_PREFIX, 'bundleId is deprecated, use topic instead');
-        apnsArgs.topic = apnsArgs.bundleId
+        apnsArgs.topic = apnsArgs.bundleId;
       }
 
       let provider = APNS._createProvider(apnsArgs);
@@ -80,56 +81,72 @@ export class APNS {
     // Start by clustering the devices per appIdentifier
     allDevices.forEach(device => {
       let appIdentifier = device.appIdentifier;
-      devicesPerAppIdentifier[appIdentifier] = devicesPerAppIdentifier[appIdentifier] || [];
+      devicesPerAppIdentifier[appIdentifier] =
+        devicesPerAppIdentifier[appIdentifier] || [];
       devicesPerAppIdentifier[appIdentifier].push(device);
     });
 
     for (let key in devicesPerAppIdentifier) {
       let devices = devicesPerAppIdentifier[key];
-      let appIdentifier = devices[0].appIdentifier;
       let providers = this._chooseProviders(appIdentifier);
 
       // No Providers found
       if (!providers || providers.length === 0) {
-        let errorPromises = devices.map(device => APNS._createErrorPromise(device.deviceToken, 'No Provider found'));
+        let errorPromises = devices.map(device =>
+          APNS._createErrorPromise(device.deviceToken, 'No Provider found'),
+        );
         allPromises = allPromises.concat(errorPromises);
         continue;
       }
+      let topic = providers[0].topic;
 
-      let headers = { expirationTime: expirationTime, topic: appIdentifier, collapseId: collapseId }
+      let headers = {
+        expirationTime: expirationTime,
+        topic,
+        collapseId: collapseId,
+      };
       let notification = APNS._generateNotification(coreData, headers);
       const deviceIds = devices.map(device => device.deviceToken);
-      let promise = this.sendThroughProvider(notification, deviceIds, providers);
+      let promise = this.sendThroughProvider(
+        notification,
+        deviceIds,
+        providers,
+      );
       allPromises.push(promise.then(this._handlePromise.bind(this)));
     }
 
-    return Promise.all(allPromises).then((results) => {
+    return Promise.all(allPromises).then(results => {
       // flatten all
       return [].concat.apply([], results);
     });
   }
 
   sendThroughProvider(notification, devices, providers) {
-    return providers[0]
-        .send(notification, devices)
-        .then((response) => {
-          if (response.failed
-              && response.failed.length > 0
-              && providers && providers.length > 1) {
-            let devices = response.failed.map((failure) => { return failure.device; });
-            // Reset the failures as we'll try next connection
-            response.failed = [];
-            return this.sendThroughProvider(notification,
-                            devices,
-                            providers.slice(1, providers.length)).then((retryResponse) => {
-                              response.failed = response.failed.concat(retryResponse.failed);
-                              response.sent = response.sent.concat(retryResponse.sent);
-                              return response;
-                            });
-          } else {
-            return response;
-          }
+    return providers[0].send(notification, devices).then(response => {
+      if (
+        response.failed &&
+        response.failed.length > 0 &&
+        providers &&
+        providers.length > 1
+      ) {
+        let devices = response.failed.map(failure => {
+          return failure.device;
         });
+        // Reset the failures as we'll try next connection
+        response.failed = [];
+        return this.sendThroughProvider(
+          notification,
+          devices,
+          providers.slice(1, providers.length),
+        ).then(retryResponse => {
+          response.failed = response.failed.concat(retryResponse.failed);
+          response.sent = response.sent.concat(retryResponse.sent);
+          return response;
+        });
+      } else {
+        return response;
+      }
+    });
   }
 
   static _validateAPNArgs(apnsArgs) {
@@ -145,7 +162,11 @@ export class APNS {
   static _createProvider(apnsArgs) {
     // if using certificate, then topic must be defined
     if (!APNS._validateAPNArgs(apnsArgs)) {
-      throw new Parse.Error(Parse.Error.PUSH_MISCONFIGURED, 'topic is mssing for %j', apnsArgs);
+      throw new Parse.Error(
+        Parse.Error.PUSH_MISCONFIGURED,
+        'topic is mssing for %j',
+        apnsArgs,
+      );
     }
 
     let provider = new apn.Provider(apnsArgs);
@@ -179,7 +200,7 @@ export class APNS {
           break;
         case 'title':
           notification.setTitle(coreData.title);
-        break;
+          break;
         case 'badge':
           notification.setBadge(coreData.badge);
           break;
@@ -224,24 +245,27 @@ export class APNS {
     }*/
 
     // Otherwise we try to match the appIdentifier with topic on provider
-    let qualifiedProviders = this.providers.filter((provider) => appIdentifier === provider.topic);
+    let qualifiedProviders = this.providers.filter(
+      provider => provider.topic.indexOf(appIdentifier) !== -1,
+    );
 
     if (qualifiedProviders.length > 0) {
       return qualifiedProviders;
     }
 
     // If qualifiedProviders empty, add all providers without topic
-    return this.providers
-      .filter((provider) => !provider.topic || provider.topic === '');
+    return this.providers.filter(
+      provider => !provider.topic || provider.topic === '',
+    );
   }
 
   _handlePromise(response) {
     let promises = [];
-    response.sent.forEach((token) => {
+    response.sent.forEach(token => {
       log.verbose(LOG_PREFIX, 'APNS transmitted to %s', token.device);
       promises.push(APNS._createSuccesfullPromise(token.device));
     });
-    response.failed.forEach((failure) => {
+    response.failed.forEach(failure => {
       promises.push(APNS._handlePushFailure(failure));
     });
     return Promise.all(promises);
@@ -249,14 +273,28 @@ export class APNS {
 
   static _handlePushFailure(failure) {
     if (failure.error) {
-      log.error(LOG_PREFIX, 'APNS error transmitting to device %s with error %s', failure.device, failure.error);
+      log.error(
+        LOG_PREFIX,
+        'APNS error transmitting to device %s with error %s',
+        failure.device,
+        failure.error,
+      );
       return APNS._createErrorPromise(failure.device, failure.error);
     } else if (failure.status && failure.response && failure.response.reason) {
-      log.error(LOG_PREFIX, 'APNS error transmitting to device %s with status %s and reason %s', failure.device, failure.status, failure.response.reason);
+      log.error(
+        LOG_PREFIX,
+        'APNS error transmitting to device %s with status %s and reason %s',
+        failure.device,
+        failure.status,
+        failure.response.reason,
+      );
       return APNS._createErrorPromise(failure.device, failure.response.reason);
     } else {
-       log.error(LOG_PREFIX, 'APNS error transmitting to device with unkown error');
-       return APNS._createErrorPromise(failure.device, 'Unkown status');
+      log.error(
+        LOG_PREFIX,
+        'APNS error transmitting to device with unkown error',
+      );
+      return APNS._createErrorPromise(failure.device, 'Unkown status');
     }
   }
 
@@ -271,9 +309,9 @@ export class APNS {
       transmitted: false,
       device: {
         deviceToken: token,
-        deviceType: 'ios'
+        deviceType: 'ios',
       },
-      response: { error: errorMessage }
+      response: { error: errorMessage },
     });
   }
 
@@ -287,8 +325,8 @@ export class APNS {
       transmitted: true,
       device: {
         deviceToken: token,
-        deviceType: 'ios'
-      }
+        deviceType: 'ios',
+      },
     });
   }
 }
