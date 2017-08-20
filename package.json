@@ -1,21 +1,15 @@
 {
-  "name": "parse-server-push-adapter",
+  "name": "parse-server-push-adapter-flynn",
   "version": "2.0.0",
   "description": "Base parse-server-push-adapter",
   "main": "lib/index.js",
-  "files": [
-    "lib/"
-  ],
+  "files": ["lib/"],
   "scripts": {
     "build": "./node_modules/.bin/babel src/ -d lib/",
     "test": "TESTING=1 nyc ./node_modules/.bin/jasmine",
     "prepublish": "npm run build"
   },
-  "keywords": [
-    "parse-server",
-    "push",
-    "adapter"
-  ],
+  "keywords": ["parse-server", "push", "adapter"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parse-server-modules/parse-server-push-adapter.git"
