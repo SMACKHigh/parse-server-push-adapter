@@ -77,23 +77,13 @@ export class APNS {
     let allPromises = [];
 
     let devicesPerAppIdentifier = {};
-    let deviceTokensPerAppIdentifier = {};
 
     // Start by clustering the devices per appIdentifier
     allDevices.forEach(device => {
       let appIdentifier = device.appIdentifier;
       devicesPerAppIdentifier[appIdentifier] =
         devicesPerAppIdentifier[appIdentifier] || [];
-      deviceTokensPerAppIdentifier[appIdentifier] =
-        deviceTokensPerAppIdentifier[appIdentifier] || [];
-      if (
-        deviceTokensPerAppIdentifier[appIdentifier].indexOf(
-          device.deviceToken,
-        ) < 0
-      ) {
-        deviceTokensPerAppIdentifier[appIdentifier].push(device.token);
-        devicesPerAppIdentifier[appIdentifier].push(device);
-      }
+      devicesPerAppIdentifier[appIdentifier].push(device);
     });
 
     for (let key in devicesPerAppIdentifier) {

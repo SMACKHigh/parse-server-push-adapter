@@ -17,12 +17,16 @@ export function classifyInstallations(installations, validPushTypes) {
     if (!installation.deviceToken) {
       continue;
     }
-    let devices = deviceMap[installation.pushType] || deviceMap[installation.deviceType] || null;
+
+    let devices =
+      deviceMap[installation.pushType] ||
+      deviceMap[installation.deviceType] ||
+      null;
     if (Array.isArray(devices)) {
       devices.push({
         deviceToken: installation.deviceToken,
         deviceType: installation.deviceType,
-        appIdentifier: installation.appIdentifier
+        appIdentifier: installation.appIdentifier,
       });
     }
   }
@@ -33,9 +37,8 @@ export function randomString(size) {
   if (size === 0) {
     throw new Error('Zero-length randomString is useless.');
   }
-  let chars = ('ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-               'abcdefghijklmnopqrstuvwxyz' +
-               '0123456789');
+  let chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz' + '0123456789';
   let objectId = '';
   let bytes = randomBytes(size);
   for (let i = 0; i < bytes.length; ++i) {
