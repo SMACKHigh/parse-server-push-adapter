@@ -237,186 +237,186 @@ describe('APNS', () => {
     done();
   });
 
-  // it('can send APNS notification', done => {
-  //   let args = {
-  //     cert: new Buffer('testCert'),
-  //     key: new Buffer('testKey'),
-  //     production: true,
-  //     topic: 'topic',
-  //   };
-  //   let apns = new APNS(args);
-  //   let provider = apns.providers[0];
-  //   spyOn(provider, 'send').and.callFake((notification, devices) => {
-  //     return Promise.resolve({
-  //       sent: devices,
-  //       failed: [],
-  //     });
-  //   });
-  //   // Mock data
-  //   let expirationTime = 1454571491354;
-  //   let collapseId = 'collapseIdentifier';
-  //   let data = {
-  //     collapse_id: collapseId,
-  //     expiration_time: expirationTime,
-  //     data: {
-  //       alert: 'alert',
-  //     },
-  //   };
-  //   // Mock devices
-  //   let mockedDevices = [
-  //     {
-  //       deviceToken: '112233',
-  //       appIdentifier: 'topic',
-  //     },
-  //     {
-  //       deviceToken: '112234',
-  //       appIdentifier: 'topic',
-  //     },
-  //     {
-  //       deviceToken: '112235',
-  //       appIdentifier: 'topic',
-  //     },
-  //     {
-  //       deviceToken: '112236',
-  //       appIdentifier: 'topic',
-  //     },
-  //   ];
-  //   let promise = apns.send(data, mockedDevices);
-  //   expect(provider.send).toHaveBeenCalled();
-  //   let calledArgs = provider.send.calls.first().args;
-  //   let notification = calledArgs[0];
-  //   expect(notification.aps.alert).toEqual(data.data.alert);
-  //   expect(notification.expiry).toEqual(data['expiration_time'] / 1000);
-  //   expect(notification.collapseId).toEqual(data['collapse_id']);
-  //   let apnDevices = calledArgs[1];
-  //   expect(apnDevices.length).toEqual(4);
-  //   done();
-  // });
+  it('can send APNS notification', done => {
+    let args = {
+      cert: new Buffer('testCert'),
+      key: new Buffer('testKey'),
+      production: true,
+      topic: 'topic',
+    };
+    let apns = new APNS(args);
+    let provider = apns.providers[0];
+    spyOn(provider, 'send').and.callFake((notification, devices) => {
+      return Promise.resolve({
+        sent: devices,
+        failed: [],
+      });
+    });
+    // Mock data
+    let expirationTime = 1454571491354;
+    let collapseId = 'collapseIdentifier';
+    let data = {
+      collapse_id: collapseId,
+      expiration_time: expirationTime,
+      data: {
+        alert: 'alert',
+      },
+    };
+    // Mock devices
+    let mockedDevices = [
+      {
+        deviceToken: '112233',
+        appIdentifier: 'topic',
+      },
+      {
+        deviceToken: '112234',
+        appIdentifier: 'topic',
+      },
+      {
+        deviceToken: '112235',
+        appIdentifier: 'topic',
+      },
+      {
+        deviceToken: '112236',
+        appIdentifier: 'topic',
+      },
+    ];
+    let promise = apns.send(data, mockedDevices);
+    expect(provider.send).toHaveBeenCalled();
+    let calledArgs = provider.send.calls.first().args;
+    let notification = calledArgs[0];
+    expect(notification.aps.alert).toEqual(data.data.alert);
+    expect(notification.expiry).toEqual(data['expiration_time'] / 1000);
+    expect(notification.collapseId).toEqual(data['collapse_id']);
+    let apnDevices = calledArgs[1];
+    expect(apnDevices.length).toEqual(4);
+    done();
+  });
 
-  // it('can send APNS notification to multiple bundles', done => {
-  //   let args = [
-  //     {
-  //       cert: new Buffer('testCert'),
-  //       key: new Buffer('testKey'),
-  //       production: true,
-  //       topic: 'topic',
-  //     },
-  //     {
-  //       cert: new Buffer('testCert'),
-  //       key: new Buffer('testKey'),
-  //       production: false,
-  //       topic: 'topic.dev',
-  //     },
-  //   ];
+  it('can send APNS notification to multiple bundles', done => {
+    let args = [
+      {
+        cert: new Buffer('testCert'),
+        key: new Buffer('testKey'),
+        production: true,
+        topic: 'topic',
+      },
+      {
+        cert: new Buffer('testCert'),
+        key: new Buffer('testKey'),
+        production: false,
+        topic: 'topic.dev',
+      },
+    ];
 
-  //   let apns = new APNS(args);
-  //   let provider = apns.providers[0];
-  //   spyOn(provider, 'send').and.callFake((notification, devices) => {
-  //     return Promise.resolve({
-  //       sent: devices,
-  //       failed: [],
-  //     });
-  //   });
-  //   let providerDev = apns.providers[1];
-  //   spyOn(providerDev, 'send').and.callFake((notification, devices) => {
-  //     return Promise.resolve({
-  //       sent: devices,
-  //       failed: [],
-  //     });
-  //   });
-  //   apns.providers = [provider, providerDev];
-  //   // Mock data
-  //   let expirationTime = 1454571491354;
-  //   let collapseId = 'collapseIdentifier';
-  //   let data = {
-  //     collapse_id: collapseId,
-  //     expiration_time: expirationTime,
-  //     data: {
-  //       alert: 'alert',
-  //     },
-  //   };
-  //   // Mock devices
-  //   let mockedDevices = [
-  //     {
-  //       deviceToken: '112233',
-  //       appIdentifier: 'topic',
-  //     },
-  //     {
-  //       deviceToken: '112234',
-  //       appIdentifier: 'topic',
-  //     },
-  //     {
-  //       deviceToken: '112235',
-  //       appIdentifier: 'topic',
-  //     },
-  //     {
-  //       deviceToken: '112235',
-  //       appIdentifier: 'topic.dev',
-  //     },
-  //     {
-  //       deviceToken: '112236',
-  //       appIdentifier: 'topic.dev',
-  //     },
-  //   ];
+    let apns = new APNS(args);
+    let provider = apns.providers[0];
+    spyOn(provider, 'send').and.callFake((notification, devices) => {
+      return Promise.resolve({
+        sent: devices,
+        failed: [],
+      });
+    });
+    let providerDev = apns.providers[1];
+    spyOn(providerDev, 'send').and.callFake((notification, devices) => {
+      return Promise.resolve({
+        sent: devices,
+        failed: [],
+      });
+    });
+    apns.providers = [provider, providerDev];
+    // Mock data
+    let expirationTime = 1454571491354;
+    let collapseId = 'collapseIdentifier';
+    let data = {
+      collapse_id: collapseId,
+      expiration_time: expirationTime,
+      data: {
+        alert: 'alert',
+      },
+    };
+    // Mock devices
+    let mockedDevices = [
+      {
+        deviceToken: '112233',
+        appIdentifier: 'topic',
+      },
+      {
+        deviceToken: '112234',
+        appIdentifier: 'topic',
+      },
+      {
+        deviceToken: '112235',
+        appIdentifier: 'topic',
+      },
+      {
+        deviceToken: '112235',
+        appIdentifier: 'topic.dev',
+      },
+      {
+        deviceToken: '112236',
+        appIdentifier: 'topic.dev',
+      },
+    ];
 
-  //   let promise = apns.send(data, mockedDevices);
+    let promise = apns.send(data, mockedDevices);
 
-  //   expect(provider.send).toHaveBeenCalled();
-  //   let calledArgs = provider.send.calls.first().args;
-  //   let notification = calledArgs[0];
-  //   expect(notification.aps.alert).toEqual(data.data.alert);
-  //   expect(notification.expiry).toEqual(data['expiration_time'] / 1000);
-  //   expect(notification.collapseId).toEqual(data['collapse_id']);
-  //   let apnDevices = calledArgs[1];
-  //   expect(apnDevices.length).toBe(3);
+    expect(provider.send).toHaveBeenCalled();
+    let calledArgs = provider.send.calls.first().args;
+    let notification = calledArgs[0];
+    expect(notification.aps.alert).toEqual(data.data.alert);
+    expect(notification.expiry).toEqual(data['expiration_time'] / 1000);
+    expect(notification.collapseId).toEqual(data['collapse_id']);
+    let apnDevices = calledArgs[1];
+    expect(apnDevices.length).toBe(3);
 
-  //   expect(providerDev.send).toHaveBeenCalled();
-  //   calledArgs = providerDev.send.calls.first().args;
-  //   notification = calledArgs[0];
-  //   expect(notification.aps.alert).toEqual(data.data.alert);
-  //   expect(notification.expiry).toEqual(data['expiration_time'] / 1000);
-  //   expect(notification.collapseId).toEqual(data['collapse_id']);
-  //   apnDevices = calledArgs[1];
-  //   expect(apnDevices.length).toBe(2);
-  //   done();
-  // });
+    expect(providerDev.send).toHaveBeenCalled();
+    calledArgs = providerDev.send.calls.first().args;
+    notification = calledArgs[0];
+    expect(notification.aps.alert).toEqual(data.data.alert);
+    expect(notification.expiry).toEqual(data['expiration_time'] / 1000);
+    expect(notification.collapseId).toEqual(data['collapse_id']);
+    apnDevices = calledArgs[1];
+    expect(apnDevices.length).toBe(2);
+    done();
+  });
 
-  // it('reports proper error when no conn is available', done => {
-  //   var args = [
-  //     {
-  //       cert:
-  //         '-----BEGIN CERTIFICATE-----fPEYJtQrEMXLC9JtFUJ6emXAWv2QdKu93QE+6o5htM+Eu/2oNFIEj2A71WUBu7kA-----END CERTIFICATE-----',
-  //       key: new Buffer('testKey'),
-  //       production: true,
-  //       bundleId: 'bundleId',
-  //     },
-  //   ];
-  //   var data = {
-  //     data: {
-  //       alert: 'alert',
-  //     },
-  //   };
-  //   var devices = [
-  //     {
-  //       deviceToken: '112233',
-  //       appIdentifier: 'invalidBundleId',
-  //     },
-  //   ];
-  //   var apns = new APNS(args);
-  //   apns.send(data, devices).then(
-  //     results => {
-  //       expect(results.length).toBe(1);
-  //       let result = results[0];
-  //       expect(result.transmitted).toBe(false);
-  //       expect(result.response.error).toBe('No Provider found');
-  //       done();
-  //     },
-  //     err => {
-  //       fail('should not fail');
-  //       done();
-  //     },
-  //   );
-  // });
+  it('reports proper error when no conn is available', done => {
+    var args = [
+      {
+        cert:
+          '-----BEGIN CERTIFICATE-----fPEYJtQrEMXLC9JtFUJ6emXAWv2QdKu93QE+6o5htM+Eu/2oNFIEj2A71WUBu7kA-----END CERTIFICATE-----',
+        key: new Buffer('testKey'),
+        production: true,
+        bundleId: 'bundleId',
+      },
+    ];
+    var data = {
+      data: {
+        alert: 'alert',
+      },
+    };
+    var devices = [
+      {
+        deviceToken: '112233',
+        appIdentifier: 'invalidBundleId',
+      },
+    ];
+    var apns = new APNS(args);
+    apns.send(data, devices).then(
+      results => {
+        expect(results.length).toBe(1);
+        let result = results[0];
+        expect(result.transmitted).toBe(false);
+        expect(result.response.error).toBe('No Provider found');
+        done();
+      },
+      err => {
+        fail('should not fail');
+        done();
+      },
+    );
+  });
 
   it('properly parses errors', done => {
     APNS._handlePushFailure({

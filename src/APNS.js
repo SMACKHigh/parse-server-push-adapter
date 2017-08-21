@@ -88,6 +88,7 @@ export class APNS {
 
     for (let key in devicesPerAppIdentifier) {
       let devices = devicesPerAppIdentifier[key];
+      let appIdentifier = devices[0].appIdentifier;
       let providers = this._chooseProviders(appIdentifier);
 
       // No Providers found
